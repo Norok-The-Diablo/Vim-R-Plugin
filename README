@@ -1,3 +1,7 @@
+This is a version of Vim-R-Plugin, compatible with Vim 5 and up, and with Python and Ocaml support.
+
+Old README:
+
 This is a mirror of http://www.vim.org/scripts/script.php?script_id=2628
 
 This plugin improves Vim's support for editing R code and makes it possible to integrate Vim with R. The functionality is similar to what you can find in Tinn-R and ESS mode of Emacs. This filetype plugin uses Tmux (Linux, OS X, or other Unix) or Python (Microsoft Windows) or Apple Script (Mac OS X) to send commands to R. The communication with R also depends on the R package vimcom.
