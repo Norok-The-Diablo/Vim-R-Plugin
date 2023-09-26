@@ -5,7 +5,7 @@
 
 " Tell R to create a list of objects file listing all currently available
 " objects in its environment. The file is necessary for omni completion.
-function BuildROmniList(pattern)
+function BuildROmniList()
     if string(g:SendCmdToR) == "function('SendCmdToR_fake')"
         return
     endif
@@ -14,7 +14,7 @@ function BuildROmniList(pattern)
     if g:vimrplugin_allnames == 1
         let omnilistcmd = omnilistcmd . ', allnames = TRUE'
     endif
-    let omnilistcmd = omnilistcmd . ', pattern = "' . a:pattern . '")'
+    let omnilistcmd = omnilistcmd . ')'
 
     call delete(g:rplugin_tmpdir . "/vimbol_finished")
     call delete(g:rplugin_tmpdir . "/eval_reply")
@@ -45,20 +45,19 @@ function BuildROmniList(pattern)
 endfunction
 
 fun! rcomplete#CompleteR(findstart, base)
-    if (&filetype == "rnoweb" || &filetype == "rmd" || &filetype == "rrst" || &filetype == "rhelp") && b:IsInRCode(0) == 0 && b:rplugin_nonr_omnifunc != ""
-        let Ofun = function(b:rplugin_nonr_omnifunc)
-        let thebegin = Ofun(a:findstart, a:base)
-        return thebegin
+    if &filetype == "rnoweb" && RnwIsInRCode(0) == 0 && exists("*LatexBox_Complete")
+        let texbegin = LatexBox_Complete(a:findstart, a:base)
+        return texbegin
     endif
     if a:findstart
         let line = getline('.')
         let start = col('.') - 1
-        while start > 0 && (line[start - 1] =~ '\w' || line[start - 1] =~ '\.' || line[start - 1] =~ '\$' || line[start - 1] =~ '@')
+        while start > 0 && (line[start - 1] =~ '\w' || line[start - 1] =~ '\.' || line[start - 1] =~ '\$')
             let start -= 1
         endwhile
+        call BuildROmniList()
         return start
     else
-        call BuildROmniList(a:base)
         let resp = []
         if strlen(a:base) == 0
             return resp
@@ -76,10 +75,6 @@ fun! rcomplete#CompleteR(findstart, base)
             if line =~ newbase
                 " Skip cols of data frames unless the user is really looking for them.
                 if a:base !~ '\$' && line =~ '\$'
-                    continue
-                endif
-                " Skip slots of S4 objects unless the user is really looking for them.
-                if a:base !~ '@' && line =~ '@'
                     continue
                 endif
                 let tmp1 = split(line, "\x06", 1)

@@ -25,9 +25,6 @@
 
 " Set completion with CTRL-X CTRL-O to autoloaded function.
 if exists('&ofu')
-    if &filetype == "rnoweb" || &filetype == "rrst" || &filetype == "rmd"
-        let b:rplugin_nonr_omnifunc = &omnifunc
-    endif
     if &filetype == "r" || &filetype == "rnoweb" || &filetype == "rdoc" || &filetype == "rhelp" || &filetype == "rrst" || &filetype == "rmd"
         setlocal omnifunc=rcomplete#CompleteR
     endif
@@ -45,6 +42,28 @@ if !exists("b:objbrtitle")
         let b:objbrtitle = "Object_Browser" . s:tnr
     endif
     unlet s:tnr
+endif
+
+
+" Make the file name of files to be sourced
+let b:bname = expand("%:t")
+let b:bname = substitute(b:bname, " ", "",  "g")
+if exists("*getpid") " getpid() was introduced in Vim 7.1.142
+    let b:rsource = g:rplugin_tmpdir . "/Rsource-" . getpid() . "-" . b:bname
+else
+    let b:randnbr = system("echo $RANDOM")
+    let b:randnbr = substitute(b:randnbr, "\n", "", "")
+    if strlen(b:randnbr) == 0
+        let b:randnbr = "NoRandom"
+    endif
+    let b:rsource = g:rplugin_tmpdir . "/Rsource-" . b:randnbr . "-" . b:bname
+    unlet b:randnbr
+endif
+unlet b:bname
+
+if exists("g:rplugin_firstbuffer") && g:rplugin_firstbuffer == ""
+    " The file global_r_plugin.vim was copied to ~/.vim/plugin
+    let g:rplugin_firstbuffer = expand("%:p")
 endif
 
 let g:rplugin_lastft = &filetype

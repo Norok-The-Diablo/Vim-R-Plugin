@@ -14,14 +14,6 @@ endif
 " be defined after the global ones:
 runtime r-plugin/common_buffer.vim
 
-if !exists("b:did_ftplugin") && !exists("g:rplugin_runtime_warn")
-    runtime ftplugin/rmd.vim
-    if !exists("b:did_ftplugin")
-        call RWarningMsgInp("Your runtime files seems to be outdated.\nSee: https://github.com/jalvesaq/R-Vim-runtime")
-        let g:rplugin_runtime_warn = 1
-    endif
-endif
-
 function! RmdIsInRCode(vrb)
     let chunkline = search("^[ \t]*```[ ]*{r", "bncW")
     let docline = search("^[ \t]*```$", "bncW")
@@ -90,7 +82,7 @@ function! RMakeRmd(t)
 
     let rmddir = expand("%:p:h")
     if has("win32") || has("win64")
-        let rmddir = substitute(rmddir, '\\', '/', 'g')
+        let rmddir = substitute(rnwdir, '\\', '/', 'g')
     endif
     if a:t == "default"
         let rcmd = 'vim.interlace.rmd("' . expand("%:t") . '", rmddir = "' . rmddir . '"'
@@ -126,6 +118,7 @@ let b:IsInRCode = function("RmdIsInRCode")
 let b:PreviousRChunk = function("RmdPreviousChunk")
 let b:NextRChunk = function("RmdNextChunk")
 let b:SendChunkToR = function("SendRmdChunkToR")
+let b:SourceLines = function("RSourceLines")
 
 "==========================================================================
 " Key bindings and menu items
@@ -163,8 +156,4 @@ call RSetPDFViewer()
 
 call RSourceOtherScripts()
 
-if exists("b:undo_ftplugin")
-    let b:undo_ftplugin .= " | unlet! b:IsInRCode b:PreviousRChunk b:NextRChunk b:SendChunkToR"
-else
-    let b:undo_ftplugin = "unlet! b:IsInRCode b:PreviousRChunk b:NextRChunk b:SendChunkToR"
-endif
+let b:undo_ftplugin .= " | unlet! b:IsInRCode b:SourceLines b:PreviousRChunk b:NextRChunk b:SendChunkToR"
